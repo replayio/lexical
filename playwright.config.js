@@ -8,6 +8,7 @@
 
 'use strict';
 const {devices} = require('@playwright/test');
+const {devices: replayDevices} = require('@replayio/playwright');
 
 const {CI} = process.env;
 const IS_CI = CI === 'true';
@@ -29,6 +30,10 @@ const config = {
       name: 'webkit',
       testDir: './packages/lexical-playground/__tests__/',
       use: {...devices['Desktop Safari']},
+    },
+    {
+      name: 'replay-chromium',
+      use: {...replayDevices['Replay Chromium']},
     },
   ],
   retries: IS_CI ? 4 : 1,
