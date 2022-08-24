@@ -33,6 +33,7 @@ const config = {
     },
     {
       name: 'replay-chromium',
+      testDir: './packages/lexical-playground/__tests__/',
       use: {...replayDevices['Replay Chromium']},
     },
   ],
