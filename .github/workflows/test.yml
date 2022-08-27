@@ -87,7 +87,7 @@ jobs:
         # if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
       - name: Download browsers
-        run: npx playwright install
+        run: npx playwright install && npx @replayio/playwright install
       - run: npm run test-e2e-ci-${{ matrix.browser }}
       - name: Upload Artifacts
         if: failure()
