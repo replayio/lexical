@@ -62,7 +62,7 @@ jobs:
         # editor-mode: ['rich-text', 'plain-text']
         events-mode: ['modern-events']
         # events-mode: ['legacy-events', 'modern-events']
-        record: ["record", "no-record"]
+        record: ['record', 'no-record']
     env:
       CI: true
       E2E_EDITOR_MODE: ${{ matrix.editor-mode }}
@@ -94,6 +94,8 @@ jobs:
       - run: npm run test-e2e-ci-${{ matrix.browser }}
         env:
           RECORD_REPLAY_NO_RECORD: ${{ matrix.record == 'no-record' && '1' || '' }}
+          RECORD_REPLAY_TEST_METRICS: 1
+          RECORD_REPLAY_WEBHOOK_URL: ${{ secrets.RECORD_REPLAY_WEBHOOK_URL }}
       - name: Upload replays
         if: ${{ always() }}
         uses: replayio/action-upload@v0.4.3
