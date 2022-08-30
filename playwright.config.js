@@ -37,7 +37,7 @@ const config = {
       use: {...replayDevices['Replay Chromium']},
     },
   ],
-  retries: IS_CI ? 4 : 1,
+  // retries: IS_CI ? 4 : 1,
   timeout: 150000,
   use: {
     navigationTimeout: 30000,
