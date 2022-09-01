@@ -10,69 +10,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # e2e-mac:
-  #   runs-on: macos-latest
-  #   strategy:
-  #     matrix:
-  #       node-version: [16.15.1]
-  #       browser: ['chromium', 'firefox', 'webkit']
-  #       editor-mode: ['rich-text', 'plain-text']
-  #       events-mode: ['legacy-events', 'modern-events']
-  #   env:
-  #     CI: true
-  #     E2E_EDITOR_MODE: ${{ matrix.editor-mode }}
-  #     E2E_EVENTS_MODE: ${{ matrix.events-mode }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: Use Node.js ${{ matrix.node-version }}
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: ${{ matrix.node-version }}
-  #     - run: npm i -g npm@8
-  #     - uses: actions/cache@v3
-  #       id: cache
-  #       with:
-  #         path: |
-  #           node_modules
-  #           packages/playwright-core/node_modules
-  #           ~/Library/Caches/ms-playwright
-  #         key: ${{ runner.os }}-CACHE_VERSION_SECRET-${{ hashFiles('package-lock.json') }}
-  #     - name: Install dependencies
-  #       if: steps.cache.outputs.cache-hit != 'true'
-  #       run: npm ci
-  #     - name: Download browsers
-  #       run: npx playwright install
-  #     - run: npm run test-e2e-ci-${{ matrix.browser }}
-  #     - name: Upload Artifacts
-  #       if: failure()
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: Test Results
-  #         path: test-results/
-  #         retention-days: 7
-
-  e2e-linux:
+  playwright-record:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [16.15.1]
-        # browser: ['chromium', 'firefox']
-        browser: ['replay']
-        editor-mode: ['plain-text']
-        # editor-mode: ['rich-text', 'plain-text']
-        events-mode: ['modern-events']
-        # events-mode: ['legacy-events', 'modern-events']
-        record: ['record', 'no-record']
     env:
       CI: true
-      E2E_EDITOR_MODE: ${{ matrix.editor-mode }}
-      E2E_EVENTS_MODE: ${{ matrix.events-mode }}
+      E2E_EDITOR_MODE: plain-text
+      E2E_EVENTS_MODE: modern-events
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js 16.15.1
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 16.15.1
       - name: install required packages
         run: |
           sudo apt-get update
@@ -91,9 +40,8 @@ jobs:
         run: npm ci
       - name: Download browsers
         run: npx playwright install && npx @replayio/playwright install
-      - run: npm run test-e2e-ci-${{ matrix.browser }}
+      - run: npm run test-e2e-ci-replay
         env:
-          RECORD_REPLAY_NO_RECORD: ${{ matrix.record == 'no-record' && '1' || '' }}
           RECORD_REPLAY_TEST_METRICS: 1
           RECORD_REPLAY_WEBHOOK_URL: ${{ secrets.RECORD_REPLAY_WEBHOOK_URL }}
       - name: Upload replays
@@ -101,239 +49,69 @@ jobs:
         uses: replayio/action-upload@v0.4.3
         with:
           api-key: rwk_2MDN0nWD1k3EQR1XejqxtcyHNXrjYlc0lKo4Tz3RRhf
-
-  # e2e-windows:
-  #   runs-on: windows-latest
-  #   strategy:
-  #     matrix:
-  #       node-version: [16.15.1]
-  #       browser: ['chromium', 'firefox']
-  #       editor-mode: ['rich-text', 'plain-text']
-  #       events-mode: ['legacy-events', 'modern-events']
-  #   env:
-  #     CI: true
-  #     E2E_EDITOR_MODE: ${{ matrix.editor-mode }}
-  #     E2E_EVENTS_MODE: ${{ matrix.events-mode }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: Use Node.js ${{ matrix.node-version }}
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: ${{ matrix.node-version }}
-  #     - run: npm i -g npm@8
-  #     # - uses: actions/cache@v3
-  #     #   id: cache
-  #     #   with:
-  #     #     path: |
-  #     #       node_modules
-  #     #       C:\Users\runneradmin\AppData\Local\ms-playwright
-  #     #     key: ${{ runner.os }}-CACHE_VERSION_SECRET-${{ hashFiles('package-lock.json') }}
-  #     # - name: Install dependencies
-  #     #   if: steps.cache.outputs.cache-hit != 'true'
-  #     - run: npm ci
-  #     - name: Download browsers
-  #       run: npx playwright install
-  #     - run: npm run test-e2e-ci-${{ matrix.browser }}
-  #     - name: Upload Artifacts
-  #       if: failure()
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: Test Results
-  #         path: ~/.npm/_logs/
-  #         retention-days: 7
-
-  # e2e-collab-mac:
-  #   runs-on: macos-latest
-  #   strategy:
-  #     matrix:
-  #       node-version: [16.15.1]
-  #       browser: ['chromium', 'firefox', 'webkit']
-  #   env:
-  #     CI: true
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: Use Node.js ${{ matrix.node-version }}
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: ${{ matrix.node-version }}
-  #     - run: npm i -g npm@8
-  #     - uses: actions/cache@v3
-  #       id: cache
-  #       with:
-  #         path: |
-  #           node_modules
-  #           packages/playwright-core/node_modules
-  #           ~/Library/Caches/ms-playwright
-  #         key: ${{ runner.os }}-CACHE_VERSION_SECRET-${{ hashFiles('package-lock.json') }}
-  #     - name: Install dependencies
-  #       if: steps.cache.outputs.cache-hit != 'true'
-  #       run: npm ci
-  #     - name: Download browsers
-  #       run: npx playwright install
-  #     - run: npm run test-e2e-collab-ci-${{ matrix.browser }}
-  #     - name: Upload Artifacts
-  #       if: failure()
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: Test Results
-  #         path: test-results/
-  #         retention-days: 7
-
-  # e2e-collab-linux:
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       node-version: [16.15.1]
-  #       browser: ['chromium', 'firefox']
-  #   env:
-  #     CI: true
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: Use Node.js ${{ matrix.node-version }}
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: ${{ matrix.node-version }}
-  #     - run: npm i -g npm@8
-  #     - name: install required packages
-  #       run: |
-  #         sudo apt-get update
-  #         sudo apt-get install xvfb
-  #     - uses: actions/cache@v3
-  #       id: cache
-  #       with:
-  #         path: |
-  #           node_modules
-  #           packages/playwright-core/node_modules
-  #           ~/.cache/ms-playwright
-  #         key: ${{ runner.os }}-CACHE_VERSION_SECRET-${{ hashFiles('package-lock.json') }}
-  #     - name: Install dependencies
-  #       if: steps.cache.outputs.cache-hit != 'true'
-  #       run: npm ci
-  #     - name: Download browsers
-  #       run: npx playwright install
-  #     - run: npm run test-e2e-collab-ci-${{ matrix.browser }}
-  #     - name: Upload Artifacts
-  #       if: failure()
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: Test Results
-  #         path: test-results/
-  #         retention-days: 7
-
-  # e2e-collab-windows:
-  #   runs-on: windows-latest
-  #   strategy:
-  #     matrix:
-  #       node-version: [16.15.1]
-  #       browser: ['chromium', 'firefox']
-  #   env:
-  #     CI: true
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: Use Node.js ${{ matrix.node-version }}
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: ${{ matrix.node-version }}
-  #     - run: npm i -g npm@8
-  #     - uses: actions/cache@v3
-  #       id: cache
-  #       with:
-  #         path: |
-  #           node_modules
-  #           C:\Users\runneradmin\AppData\Local\ms-playwright
-  #         key: ${{ runner.os }}-CACHE_VERSION_SECRET-${{ hashFiles('package-lock.json') }}
-  #     - name: Install dependencies
-  #       #   if: steps.cache.outputs.cache-hit != 'true'
-  #       run: npm ci
-  #     - name: Download browsers
-  #       run: npx playwright install
-  #     - run: npm run test-e2e-collab-ci-${{ matrix.browser }}
-  #     - name: Upload Artifacts
-  #       if: failure()
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: Test Results
-  #         path: test-results/
-  #         retention-days: 7
-
-  # e2e-prod:
-  #   runs-on: macos-latest
-  #   strategy:
-  #     matrix:
-  #       node-version: [16.15.1]
-  #       browser: ['chromium']
-  #       editor-mode: ['rich-text', 'plain-text']
-  #       events-mode: ['modern-events']
-  #   env:
-  #     CI: true
-  #     E2E_EDITOR_MODE: ${{ matrix.editor-mode }}
-  #     E2E_EVENTS_MODE: ${{ matrix.events-mode }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: Use Node.js ${{ matrix.node-version }}
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: ${{ matrix.node-version }}
-  #     - run: npm i -g npm@8
-  #     - uses: actions/cache@v3
-  #       id: cache
-  #       with:
-  #         path: |
-  #           node_modules
-  #           packages/playwright-core/node_modules
-  #           ~/Library/Caches/ms-playwright
-  #         key: ${{ runner.os }}-CACHE_VERSION_SECRET-${{ hashFiles('package-lock.json') }}
-  #     - name: Install dependencies
-  #       if: steps.cache.outputs.cache-hit != 'true'
-  #       run: npm ci
-  #     - name: Download browsers
-  #       run: npx playwright install
-  #     - run: npm run test-e2e-prod-ci-${{ matrix.browser }}
-  #     - name: Upload Artifacts
-  #       if: failure()
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: Test Results
-  #         path: test-results/
-  #         retention-days: 7
-
-  # e2e-collab-prod:
-  #   runs-on: macos-latest
-  #   strategy:
-  #     matrix:
-  #       node-version: [16.15.1]
-  #       browser: ['chromium']
-  #       editor-mode: ['rich-text']
-  #       events-mode: ['modern-events']
-  #   env:
-  #     CI: true
-  #     E2E_EDITOR_MODE: ${{ matrix.editor-mode }}
-  #     E2E_EVENTS_MODE: ${{ matrix.events-mode }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: Use Node.js ${{ matrix.node-version }}
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: ${{ matrix.node-version }}
-  #     - run: npm i -g npm@8
-  #     - uses: actions/cache@v3
-  #       id: cache
-  #       with:
-  #         path: |
-  #           node_modules
-  #           packages/playwright-core/node_modules
-  #           ~/Library/Caches/ms-playwright
-  #         key: ${{ runner.os }}-CACHE_VERSION_SECRET-${{ hashFiles('package-lock.json') }}
-  #     - name: Install dependencies
-  #       if: steps.cache.outputs.cache-hit != 'true'
-  #       run: npm ci
-  #     - name: Download browsers
-  #       run: npx playwright install
-  #     - run: npm run test-e2e-collab-prod-ci-${{ matrix.browser }}
-  #     - name: Upload Artifacts
-  #       if: failure()
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: Test Results
-  #         path: test-results/
-  #         retention-days: 7
+  playwright-no-record:
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+      E2E_EDITOR_MODE: plain-text
+      E2E_EVENTS_MODE: modern-events
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 16.15.1
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.15.1
+      - name: install required packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install xvfb
+      - run: npm i -g npm@8
+      - uses: actions/cache@v3
+        id: cache
+        with:
+          path: |
+            node_modules
+            packages/playwright-core/node_modules
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-CACHE_VERSION_SECRET-${{ hashFiles('package-lock.json') }}
+      - name: Install dependencies
+        # if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci
+      - name: Download browsers
+        run: npx playwright install && npx @replayio/playwright install
+      - run: npm run test-e2e-ci-replay
+        env:
+          RECORD_REPLAY_NO_RECORD: 1
+          RECORD_REPLAY_TEST_METRICS: 1
+          RECORD_REPLAY_WEBHOOK_URL: ${{ secrets.RECORD_REPLAY_WEBHOOK_URL }}
+  playwright-original:
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+      E2E_EDITOR_MODE: plain-text
+      E2E_EVENTS_MODE: modern-events
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 16.15.1
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.15.1
+      - name: install required packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install xvfb
+      - run: npm i -g npm@8
+      - uses: actions/cache@v3
+        id: cache
+        with:
+          path: |
+            node_modules
+            packages/playwright-core/node_modules
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-CACHE_VERSION_SECRET-${{ hashFiles('package-lock.json') }}
+      - name: Install dependencies
+        # if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci
+      - name: Download browsers
+        run: npx playwright install
+      - run: npm run test-e2e-ci-chromium
