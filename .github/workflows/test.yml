@@ -48,6 +48,7 @@ jobs:
         if: ${{ always() }}
         uses: replayio/action-upload@v0.4.3
         with:
+          public: true
           api-key: rwk_2MDN0nWD1k3EQR1XejqxtcyHNXrjYlc0lKo4Tz3RRhf
   playwright-no-record:
     runs-on: ubuntu-latest
